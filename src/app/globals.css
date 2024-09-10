@@ -66,11 +66,21 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
+.container {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: red;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
 }

@@ -1,5 +1,4 @@
 import Footer from "@/components/footer";
-import { GhStatsForm } from "@/components/gh-stats-form";
 import { Preview } from "@/components/preview";
 
 export default function Home() {
@@ -15,7 +14,6 @@ export default function Home() {
           </p>
         </div>
         <div>
-          <GhStatsForm />
           <Preview />
         </div>
       </div>

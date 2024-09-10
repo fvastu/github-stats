@@ -3,7 +3,7 @@ import { Preview } from "@/components/preview";
 
 export default function Home({ params }: { params: { username: string } }) {
   return (
-    <main className="container flex flex-col justify-between min-h-screen pt-36">
+    <main className="bg-neutral-800 container flex flex-col justify-between min-h-screen pt-36">
       <div className="space-y-10">
         <div className="text-center">
           <h1 className="text-5xl font-semibold tracking-tighter">

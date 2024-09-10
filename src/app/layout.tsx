@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
-import Navbar from "@/components/navbar";
 import "./globals.css";
-import { CSPostHogProvider } from "./provider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.github-stats.omsimos.com"),
@@ -35,16 +34,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <CSPostHogProvider>
-        <body className={`${GeistSans.className} ${GeistMono.variable}`}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Navbar />
-            <Toaster />
-            <NextTopLoader />
-            {children}
-          </ThemeProvider>
-        </body>
-      </CSPostHogProvider>
+      <body className={`${GeistSans.className} ${GeistMono.variable}`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Navbar />
+          <Toaster />
+          <NextTopLoader />
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
