@@ -19,8 +19,8 @@ import { requestGithubData } from "./request";
 
 // Need to be here - Exporting from another file makes array of null
 export const TOKENS = [
-  process.env.GITHUB_ACCESS_TOKEN,
-  process.env.GITHUB_ACCESS_TOKEN2,
+  process.env.GITHUB_ACCESS_TOKEN as string,
+  process.env.GITHUB_ACCESS_TOKEN2 as string,
 ];
 
 export class GithubApiService extends GithubRepository {

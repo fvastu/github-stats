@@ -1,20 +1,62 @@
 export const queryUserActivity = `
-    query userInfo($username: String!) {
-      user(login: $username) {
+  query userInfo($username: String!) {
+    user(login: $username) {
+    id
+      login
+      name
+      avatarUrl
+      bio
+      company
+      location
+      email
+      twitterUsername
+      websiteUrl
+      status {
         createdAt
-        contributionsCollection {
-          totalCommitContributions
-          restrictedContributionsCount
-          totalPullRequestReviewContributions
+        emoji
+        message
+      }
+      createdAt
+      contributionsCollection {
+        totalCommitContributions
+        restrictedContributionsCount
+        totalPullRequestReviewContributions
+      }
+      organizations(first: 1) {
+        totalCount
+      }
+      following {
+        totalCount
+      }
+      anyPinnableItems
+      pinnedItems(first: 6) {
+        totalCount
+        nodes {
+          ... on Gist {
+            name
+          }
+          ... on Repository {
+            name
+          }
         }
-        organizations(first: 1) {
-          totalCount
-        }
-        followers(first: 1) {
-          totalCount
+      }
+      sponsoring {
+        totalCount
+      }
+      sponsors {
+        totalCount
+      }
+      starredRepositories {
+        totalCount
+      }
+      publicKeys(first: 5) {
+        totalCount
+        nodes {
+          key
         }
       }
     }
+  }
 `;
 
 export const queryUserIssue = `

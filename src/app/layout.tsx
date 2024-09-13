@@ -1,10 +1,6 @@
-import Navbar from "@/components/navbar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -35,12 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${GeistSans.className} ${GeistMono.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          <Toaster />
-          <NextTopLoader />
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );

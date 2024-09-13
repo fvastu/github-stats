@@ -13,9 +13,7 @@ export async function requestGithubData<T = unknown>(
   variables: Record<string, any> = {}, // Use Record<string, any> for flexibility
   token: string
 ): Promise<T> {
-  if (!token) {
-    throw new Error("GitHub API token is required.");
-  }
+  if (!token) throw new Error("GitHub API token is required.");
 
   const headers = {
     "Content-Type": "application/json",

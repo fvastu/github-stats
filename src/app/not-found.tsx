@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -11,9 +10,9 @@ export default function NotFound() {
           </h1>
           <p className="text-muted-foreground text-xl">Are you lost? 🥹</p>
         </div>
-        <Button asChild className="mx-auto">
+        <button className="mx-auto">
           <Link href="/">Back home</Link>
-        </Button>
+        </button>
       </div>
     </main>
   );

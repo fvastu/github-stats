@@ -1,6 +1,3 @@
-import Footer from "@/components/footer";
-import { Preview } from "@/components/preview";
-
 export default function Home() {
   return (
     <main className="flex gap-10 justify-between flex-col min-h-screen pt-36 container">
@@ -13,11 +10,7 @@ export default function Home() {
             Generate your GitHub stats for your README with ease!
           </p>
         </div>
-        <div>
-          <Preview />
-        </div>
       </div>
-      <Footer />
     </main>
   );
 }
