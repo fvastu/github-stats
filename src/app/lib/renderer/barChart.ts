@@ -46,15 +46,15 @@ const DEFAULT_SHAPE = {
   width: DEFAULT_WIDTH,
   height: DEFAULT_HEIGHT,
   barWidth: 50,
-  direction: "vertical" as "vertical" | "horizontal",
+  direction: "vertical" as BarChartDirection,
   cornerRadius: 5,
 };
 
 // Function to generate bars
 const generateBars = (
-  g: any,
+  g: d3.Selection<SVGGElement, unknown, null, undefined>,
   values: Array<BarChartDataType>,
-  direction: "horizontal" | "vertical",
+  direction: BarChartDirection,
   barWidth: number,
   gap: number,
   width: number,
@@ -117,7 +117,7 @@ const generateBars = (
 export const createBarChartSvg = (
   values: Array<BarChartDataType>,
   config: Partial<BarChartSettingsType>
-) => {
+): string => {
   const { shape = {}, chartText = {}, monochrome } = config;
 
   const {
@@ -137,11 +137,12 @@ export const createBarChartSvg = (
 
   const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
 
-  let body = d3.select(dom.window.document.querySelector("body"));
+  const body: d3.Selection<HTMLBodyElement, unknown, null, undefined> =
+    d3.select(dom.window.document.querySelector("body"));
 
   // Create the SVG container and set the viewbox
   const svg = body
-    .append("svg")
+    .append<SVGSVGElement>("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("xmlns", "http://www.w3.org/2000/svg");
 
@@ -230,10 +231,10 @@ const configHorizontal = {
 };
 
 // Generate SVG for vertical chart
-export const barChartDemoVertical = () => {
+export const barChartDemoVertical = (): string => {
   return createBarChartSvg(barChartData, configVertical);
 };
 
-export const barChartDemoHorizontal = () => {
+export const barChartDemoHorizontal = (): string => {
   return createBarChartSvg(barChartData, configHorizontal);
 };

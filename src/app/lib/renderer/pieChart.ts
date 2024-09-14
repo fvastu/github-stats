@@ -4,7 +4,7 @@ const { JSDOM } = require("jsdom");
 
 const MONOCHROME_BLUE = "#3498db";
 const DEFAULT_WIDTH = 1000;
-const DEFUALT_HEIGHT = DEFAULT_WIDTH / 2;
+const DEFAULT_HEIGHT = DEFAULT_WIDTH / 2;
 
 type PieChartDataType = {
   startAngle: number;
@@ -35,26 +35,26 @@ type PieChartSettingsType = {
   chartText: Partial<PieChartSettingsChartTextType>;
 };
 
-const DEFAULT_CHART_TEXT = {
+const DEFAULT_CHART_TEXT: PieChartSettingsChartTextType = {
   label: "",
   color: "black",
-  size: `${(14 * DEFAULT_WIDTH) / 1000}px`,
+  size: (14 * DEFAULT_WIDTH) / 1000,
 };
 
-const DEFAULT_SHAPE = {
+const DEFAULT_SHAPE: PieChartSettingsShapeType = {
   isSemiCircle: false,
   cornerRadius: 0,
   gap: 0,
   width: DEFAULT_WIDTH,
-  height: DEFUALT_HEIGHT,
-  outerRadius: DEFUALT_HEIGHT / 2 - 10,
-  innerRadius: (DEFUALT_HEIGHT / 2 - 10) * 0.75,
+  height: DEFAULT_HEIGHT,
+  outerRadius: DEFAULT_HEIGHT / 2 - 10,
+  innerRadius: (DEFAULT_HEIGHT / 2 - 10) * 0.75,
 };
 
 const createPieChartSvg = (
-  values: Array<PieChartDataType>,
+  values: PieChartDataType[],
   config: Partial<PieChartSettingsType>
-) => {
+): string => {
   const { shape = {}, chartText = {}, monochrome = MONOCHROME_BLUE } = config;
 
   const {
@@ -74,31 +74,28 @@ const createPieChartSvg = (
   } = chartText;
 
   const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
-
-  let body = d3.select(dom.window.document.querySelector("body"));
+  const body = d3.select(dom.window.document.querySelector("body"));
 
   const tau = isSemiCircle ? Math.PI : 2 * Math.PI;
 
-  // Create the SVG container and set the viewbox
   const svg = body
     .append("svg")
-    .attr("viewBox", [0, 0, width, height])
+    .attr("viewBox", [0, 0, width, height].toString())
     .attr("xmlns", "http://www.w3.org/2000/svg");
 
   svg
     .append("text")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+    .attr("transform", `translate(${width / 2}, ${height / 2})`)
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "middle")
-    .style("font-size", size)
+    .style("font-size", `${size}px`)
     .attr("fill", color)
     .text(label);
 
   const g = svg
     .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-  // Function to create an arc based on provided start and end angles
   const createArc = (startAngle: number, endAngle: number) => {
     return d3
       .arc()
@@ -106,23 +103,21 @@ const createPieChartSvg = (
       .outerRadius(outerRadius)
       .startAngle(startAngle)
       .endAngle(endAngle)
-      .cornerRadius(cornerRadius || 0); // Apply corner radius if provided
+      .cornerRadius(cornerRadius || 0);
   };
 
   const monochromeShades = monochrome
     ? generateShades(monochrome, values.length)
     : [];
-  // Iterate over the array of values to create both the grey background and the colored foreground arcs
-  // Iterate over the array of values to create the arcs with custom radius and gaps
+
   values.forEach(({ startAngle, endAngle, color, label }, index) => {
     const colorArc = monochrome
       ? monochromeShades[monochromeShades.length - 1 - index]
       : color;
     const semiCircleCorrection = isSemiCircle ? 0.5 * tau : 0;
-    // Apply the gap between arcs by adjusting the angles
     const arcStart = startAngle * tau + gap - semiCircleCorrection;
     const arcEnd = endAngle * tau + gap - semiCircleCorrection;
-    // Background arc (grey) spans the entire circle from startAngle to tau (full circle)
+
     const backgroundArc = createArc(
       startAngle * tau - semiCircleCorrection,
       tau / (isSemiCircle ? 2 : 1)
@@ -130,14 +125,15 @@ const createPieChartSvg = (
     g.append("path")
       .datum({ endAngle: tau })
       .style("fill", "#ddd")
-      .attr("d", backgroundArc as any);
+      // @ts-ignore
+      .attr("d", backgroundArc);
 
-    // Foreground arc spans from adjusted startAngle to endAngle with corner radius and gaps
     const foregroundArc = createArc(arcStart, arcEnd);
     g.append("path")
       .datum({ endAngle: arcEnd })
       .style("fill", colorArc)
-      .attr("d", foregroundArc as any);
+      // @ts-ignore
+      .attr("d", foregroundArc);
 
     if (!label) return;
 
@@ -150,17 +146,17 @@ const createPieChartSvg = (
       .attr("y", function (d: any) {
         return labelArc.centroid(d)[1];
       })
-      .attr("dy", "0.35em") // Adjusts the vertical alignment of the text
-      .attr("text-anchor", "middle") // Centers the label
-      .style("fill", "#FFF") // Color of the label text
-      .style("font-size", `${(14 * width) / 1000}px`) // Size of the label text
-      .text(label); // The actual label text
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle")
+      .style("fill", "#FFF")
+      .style("font-size", `${(14 * width) / 1000}px`)
+      .text(label);
   });
 
   return body.html();
 };
 
-const arcsDataDefault = [
+const arcsDataDefault: PieChartDataType[] = [
   { startAngle: 0, endAngle: 0.127, color: "orange", label: "C#" },
   { startAngle: 0.127, endAngle: 0.357, color: "red", label: "Javascript" },
   { startAngle: 0.357, endAngle: 0.6, color: "blue", label: "CSS" },
@@ -168,7 +164,7 @@ const arcsDataDefault = [
   { startAngle: 0.8, endAngle: 0.9, color: "purple", label: "Java" },
 ];
 
-export const pieChartDemo = () => {
+export const pieChartDemo = (): string => {
   return createPieChartSvg(arcsDataDefault, {
     shape: {
       cornerRadius: 0,
