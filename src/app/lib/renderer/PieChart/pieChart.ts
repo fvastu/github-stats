@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { JSDOM } from "jsdom";
 import { generateShades } from "../../colors";
 import { D3G, D3SVG } from "../../common/types";
 import { validatePositiveValue } from "../../validators";
@@ -13,7 +14,6 @@ import {
   MONOCHROME_BLUE,
 } from "./constants";
 import { PieChartSettings, PieChartSlice } from "./types";
-const { JSDOM } = require("jsdom");
 
 /**
  * Adds a label to the center of the SVG element.
@@ -43,13 +43,12 @@ const addChartLabel = (
 /**
  * Creates pie chart slices and appends them to the group element.
  */
-const createArcs = (
+const addArcs = (
   g: D3G,
   slices: PieChartSlice[],
   arcSettings: {
     tau: number;
     gap: number;
-    monochromeShades: string[];
     innerRadius: number;
     outerRadius: number;
     cornerRadius: number;
@@ -60,7 +59,6 @@ const createArcs = (
   const {
     tau,
     gap,
-    monochromeShades,
     innerRadius,
     outerRadius,
     cornerRadius,
@@ -78,10 +76,6 @@ const createArcs = (
         .endAngle(endAngle)
         .cornerRadius(cornerRadius);
     };
-
-    const sliceColor = monochromeShades.length
-      ? monochromeShades[monochromeShades.length - 1 - index]
-      : color;
 
     const semiCircleCorrection = isSemiCircle ? 0.5 * tau : 0;
     const arcStart = startAngle * tau + gap - semiCircleCorrection;
@@ -102,7 +96,7 @@ const createArcs = (
     const foregroundArc = createArc(arcStart, arcEnd);
     g.append("path")
       .datum({ endAngle: arcEnd })
-      .style("fill", sliceColor)
+      .style("fill", color)
       // @ts-ignore
       .attr("d", foregroundArc);
 
@@ -171,6 +165,9 @@ const addLegend = (svg: D3SVG, slices: PieChartSlice[], color: string) => {
     .enter()
     .append("g")
     .attr("class", "legend-item")
+    .attr("fill", function (_, i) {
+      return slices[i].color;
+    })
     .attr("transform", function (_, i) {
       const xOffset =
         computeLegendItemPosition(labels as string[], i) + LEGEND_PADDING;
@@ -178,10 +175,7 @@ const addLegend = (svg: D3SVG, slices: PieChartSlice[], color: string) => {
     });
 
   // Append legend circles
-  legendItems
-    .append("circle")
-    .style("fill", "red")
-    .attr("r", LEGEND_ITEM_CIRCLE_RADIUS);
+  legendItems.append("circle").attr("r", LEGEND_ITEM_CIRCLE_RADIUS);
 
   // Append legend text
   legendItems
@@ -220,7 +214,7 @@ export const createPieChartSvg = (
   let height = size;
   const width = size;
 
-  // Validate settings
+  // TODO: Validate settings using Yup or similar
   validatePositiveValue(innerRadius, "Inner Radius");
   validatePositiveValue(size, "Size");
   validatePositiveValue(gap, "Gap");
@@ -232,10 +226,15 @@ export const createPieChartSvg = (
   // Define tau based on whether the chart is a semi-circle
   const tau = isSemiCircle ? Math.PI : 2 * Math.PI;
 
-  // Generate color shades if monochrome is used
-  const monochromeShades = monochrome
-    ? generateShades(monochrome, slices.length)
-    : [];
+  // Generate color shades only if monochrome is true
+  if (monochrome) {
+    const shades = generateShades(monochrome, slices.length);
+
+    slices = slices.map((s, i) => ({
+      ...s,
+      color: shades[i],
+    }));
+  }
 
   const svg = body
     .append("svg")
@@ -249,10 +248,10 @@ export const createPieChartSvg = (
       `translate(${width / 2}, ${height / 2 + LEGEND_CONTAINER_HEIGHT})`
     );
 
-  createArcs(chartGroup, slices, {
+  // Add arcs and add the background
+  addArcs(chartGroup, slices, {
     tau,
     gap,
-    monochromeShades,
     innerRadius,
     outerRadius: height / 2,
     cornerRadius,
@@ -260,7 +259,15 @@ export const createPieChartSvg = (
     size,
   });
 
+  // Add legend
   addLegend(svg, slices, "black");
+
+  // add the chart label (only center atm)
+  addChartLabel(svg, size, size + LEGEND_CONTAINER_HEIGHT, {
+    label: chartText.label,
+    color: chartText.color,
+    size: chartText.size,
+  });
 
   return body.html();
 };

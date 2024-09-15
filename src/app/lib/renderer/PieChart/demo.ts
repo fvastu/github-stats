@@ -13,9 +13,9 @@ const exampleSlices: PieChartSlice[] = [
 export const pieChartDemo = (): string => {
   return createPieChartSvg(exampleSlices, {
     shape: {
-      cornerRadius: 0,
+      cornerRadius: 30,
       size: 800,
-      innerRadius: 0,
+      innerRadius: 200,
       isSemiCircle: false,
     },
     chartText: {

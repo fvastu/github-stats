@@ -4,7 +4,7 @@ import { PieChartShapeSettings, PieChartTextSettings } from "./types";
 export const MONOCHROME_BLUE = "#3498db";
 
 // Default size for the chart
-export const DEFAULT_SIZE = 1000;
+export const DEFAULT_SIZE = 100;
 
 // Legend item styles
 export const LEGEND_ITEM_CIRCLE_RADIUS = 8;
@@ -19,7 +19,7 @@ export const LEGEND_PADDING =
 export const DEFAULT_TEXT_SETTINGS: PieChartTextSettings = {
   label: "",
   color: "black",
-  size: (12 * DEFAULT_SIZE) / 100,
+  size: (20 * DEFAULT_SIZE) / 100,
 };
 
 export const DEFAULT_SHAPE_SETTINGS: PieChartShapeSettings = {

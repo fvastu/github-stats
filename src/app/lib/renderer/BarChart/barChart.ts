@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { generateShades } from "../colors";
+import { generateShades } from "../../colors";
 const { JSDOM } = require("jsdom");
 
 const MONOCHROME_BLUE = "#3498db";
