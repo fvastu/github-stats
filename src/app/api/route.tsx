@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { barChartDemoVertical } from "../lib/renderer/barChart";
+import { pieChartDemo } from "../lib/renderer/PieChart";
 import { GithubApiService } from "../lib/services/GithubApiService";
 const serviceProvider = new GithubApiService();
 
@@ -8,7 +8,8 @@ export const GET = async () => {
   const headers = new Headers();
   // remember to change the filename here
   headers.append("Content-Type", "image/svg+xml");
-  const svg = barChartDemoVertical();
+  //const svg = barChartDemoVertical();
+  const svg = pieChartDemo();
   return new NextResponse(svg, { headers });
 
   // Return the SVG element.
