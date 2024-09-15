@@ -10,20 +10,15 @@ import {
 import {
   DEFAULT_SHAPE_SETTINGS,
   LEGEND_CONTAINER_HEIGHT,
+  LEGEND_TEXT_VERTICAL_OFFSET,
   MONOCHROME_BLUE,
 } from "./constants";
 import { PieChartSettings, PieChartSlice } from "./types";
 
-const offsetChartTextMap: Record<string, number> = {
-  none: 0,
-  top: -LEGEND_CONTAINER_HEIGHT,
-  bottom: LEGEND_CONTAINER_HEIGHT,
-};
-
 /**
  * Creates an SVG element for a pie chart.
  */
-export const createPieChartSvg = (
+export const createSemiCirclePieChartSvg = (
   slices: PieChartSlice[],
   settings: Partial<PieChartSettings>
 ): string => {
@@ -51,29 +46,27 @@ export const createPieChartSvg = (
   validatePositiveValue(cornerRadius, "Corner Radius");
 
   // Adjust height if legend is present (in every case - bottom or top)
-  if (legend.position !== "none") height -= LEGEND_CONTAINER_HEIGHT;
+  if (legend.position !== "none") height -= 2 * LEGEND_CONTAINER_HEIGHT;
 
   // Change offsets according to the legend position "top/bottom"
   const offsetChartWithLegend =
     legend.position === "top" ? LEGEND_CONTAINER_HEIGHT : 0;
 
-  // Define vertical offset values based on legend position
-  const offsetLegendVerticalOffsetMap: Record<string, number> = {
-    top: 0,
-    none: 0,
-    default: height + offsetChartWithLegend,
-  };
+  // Calculate vertical offset for the legend based on its position and chart type
+  let offsetLegendVerticalOffset;
 
-  // Determine the vertical offset for the legend
-  const offsetLegendVerticalOffset =
-    offsetLegendVerticalOffsetMap[legend.position ?? "default"];
+  if (["top", "none"].includes(legend.position ?? "none")) {
+    offsetLegendVerticalOffset = 0;
+  } else {
+    offsetLegendVerticalOffset =
+      (height + LEGEND_CONTAINER_HEIGHT) / 2 - LEGEND_TEXT_VERTICAL_OFFSET;
+  }
 
   const offsetChartText =
-    offsetChartTextMap[legend.position ?? "none"] ?? LEGEND_CONTAINER_HEIGHT;
+    legend.position === "none" ? 0 : -2 * LEGEND_CONTAINER_HEIGHT;
 
   // Define tau based on whether the chart is a semi-circle
-  const tau = 2 * Math.PI;
-
+  const tau = Math.PI;
   // Generate color shades only if monochromeColor is true
   if (monochromeColor) {
     const shades = generateShades(monochromeColor, slices.length);
@@ -84,7 +77,8 @@ export const createPieChartSvg = (
   }
 
   // create an empty svg add attach meta informations
-  const svg = createSvgElement(size, size, false);
+  // create an empty svg add attach meta informations
+  const svg = createSvgElement(size, size, true);
 
   // center the position of the chart
   const chart = svg
@@ -101,7 +95,7 @@ export const createPieChartSvg = (
     innerRadius,
     outerRadius: height / 2,
     cornerRadius,
-    isSemiCircle: false,
+    isSemiCircle: true,
     size,
   });
 
@@ -115,10 +109,11 @@ export const createPieChartSvg = (
     });
 
   // add the chart label (only center atm)
-  addChartText(svg, size, size - offsetChartText, {
-    label: chartText.label,
-    color: chartText.color,
-  });
+  if (chartText.label)
+    addChartText(svg, size, size + offsetChartText - innerRadius, {
+      label: chartText.label,
+      color: chartText.color,
+    });
 
   return getHtml();
 };

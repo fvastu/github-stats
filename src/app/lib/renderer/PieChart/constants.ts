@@ -1,20 +1,20 @@
 import { PieChartShapeSettings, PieChartTextSettings } from "./types";
 
-// Default color for monochrome charts
+// Default color for monochromeColor charts
 export const MONOCHROME_BLUE = "#3498db";
 
 // Default size for the chart
 export const DEFAULT_SIZE = 100;
 
 // Legend item styles
-export const LEGEND_ITEM_CIRCLE_RADIUS = 8;
+export const LEGEND_ITEM_CIRCLE_RADIUS = 10;
 export const LEGEND_ITEM_PADDING = 20;
-export const LEGEND_TEXT_VERTICAL_OFFSET = 13;
 export const LEGEND_CONTAINER_HEIGHT = 50;
+export const LEGEND_TEXT_VERTICAL_OFFSET = LEGEND_CONTAINER_HEIGHT / 2;
 
 // Padding to account for the legend's impact on chart size
 export const LEGEND_PADDING =
-  LEGEND_CONTAINER_HEIGHT + LEGEND_ITEM_CIRCLE_RADIUS;
+  LEGEND_CONTAINER_HEIGHT / 2 + LEGEND_ITEM_CIRCLE_RADIUS;
 
 export const DEFAULT_TEXT_SETTINGS: PieChartTextSettings = {
   label: "",
@@ -23,7 +23,6 @@ export const DEFAULT_TEXT_SETTINGS: PieChartTextSettings = {
 };
 
 export const DEFAULT_SHAPE_SETTINGS: PieChartShapeSettings = {
-  isSemiCircle: false,
   cornerRadius: 0,
   gap: 0,
   size: DEFAULT_SIZE,

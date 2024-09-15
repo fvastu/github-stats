@@ -1,3 +1,5 @@
+export type LegendPosition = "top" | "bottom" | "none";
+
 export type PieChartSlice = {
   startAngle: number;
   endAngle: number;
@@ -10,7 +12,6 @@ export type PieChartShapeSettings = {
   gap: number;
   size: number;
   innerRadius: number;
-  isSemiCircle: boolean;
 };
 
 export type PieChartTextSettings = {
@@ -20,14 +21,14 @@ export type PieChartTextSettings = {
 };
 
 export type PieChartLegendSettings = {
-  position: "top" | "bottom";
+  position: LegendPosition;
   color: string;
   size: number;
 };
 
 export type PieChartSettings = {
   shape: Partial<PieChartShapeSettings>;
-  monochrome: string;
+  monochromeColor: string;
   chartText: Partial<PieChartTextSettings>;
   legend: Partial<PieChartLegendSettings>;
 };

@@ -31,7 +31,7 @@ type BarChartSettingsChartTextType = {
 
 type BarChartSettingsType = {
   shape: Partial<BarChartSettingsShapeType>;
-  monochrome: string;
+  monochromeColor: string;
   chartText: Partial<BarChartSettingsChartTextType>;
 };
 
@@ -118,7 +118,7 @@ export const createBarChartSvg = (
   values: Array<BarChartDataType>,
   config: Partial<BarChartSettingsType>
 ): string => {
-  const { shape = {}, chartText = {}, monochrome } = config;
+  const { shape = {}, chartText = {}, monochromeColor } = config;
 
   const {
     gap = DEFAULT_SHAPE["gap"],
@@ -164,9 +164,9 @@ export const createBarChartSvg = (
     .domain([0, d3.max(values, (d) => d.value) || 1])
     .range(direction === "vertical" ? [0, height - 50] : [0, width - 100]);
 
-  // Generate monochrome shades if needed
-  const monochromeShades = monochrome
-    ? generateShades(monochrome, values.length)
+  // Generate monochromeColor shades if needed
+  const monochromeShades = monochromeColor
+    ? generateShades(monochromeColor, values.length)
     : [];
 
   // Call the function to generate bars
@@ -205,7 +205,7 @@ const configVertical = {
     width: 1000,
     height: 500,
   },
-  monochrome: "#3498db",
+  monochromeColor: "#3498db",
   chartText: {
     label: "Programming Languages - Vertical",
     color: "black",
@@ -222,7 +222,7 @@ const configHorizontal = {
     width: 1000,
     height: 400,
   },
-  monochrome: "#e74c3c",
+  monochromeColor: "#e74c3c",
   chartText: {
     label: "Programming Languages - Horizontal",
     color: "black",
