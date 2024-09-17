@@ -1,152 +1,32 @@
 import * as d3 from "d3";
+import { JSDOM } from "jsdom";
 import { generateShades } from "../../colors";
-const { JSDOM } = require("jsdom");
+import { D3G, D3SVG } from "../../common/types";
+import { DEFAULT_CHART_TEXT, DEFAULT_SETTINGS_BAR_CHART } from "./constants";
+import {
+  BarChartDataType,
+  BarChartLabelPosition,
+  BarChartSettingsChartTextType,
+  BarChartSettingsType,
+} from "./types";
 
-const MONOCHROME_BLUE = "#3498db";
-const DEFAULT_WIDTH = 1000;
-const DEFAULT_HEIGHT = DEFAULT_WIDTH / 2;
+const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
+const body = d3.select(dom.window.document.querySelector("body"));
 
-type BarChartDataType = {
-  value: number;
-  color: string;
-  label?: string;
-};
+export const getHtml = () => body.html();
 
-type BarChartDirection = "horizontal" | "vertical";
-
-type BarChartSettingsShapeType = {
-  gap: number;
-  width: number;
-  height: number;
-  barWidth: number;
-  direction: BarChartDirection;
-  cornerRadius: number;
-};
-
-type BarChartSettingsChartTextType = {
-  label: string;
-  color: string;
-  size: number;
-};
-
-type BarChartSettingsType = {
-  shape: Partial<BarChartSettingsShapeType>;
-  monochromeColor: string;
-  chartText: Partial<BarChartSettingsChartTextType>;
-};
-
-const DEFAULT_CHART_TEXT = {
-  label: "",
-  color: "black",
-  size: `${(14 * DEFAULT_WIDTH) / 1000}px`,
-};
-
-const DEFAULT_SHAPE = {
-  gap: 10,
-  width: DEFAULT_WIDTH,
-  height: DEFAULT_HEIGHT,
-  barWidth: 50,
-  direction: "vertical" as BarChartDirection,
-  cornerRadius: 5,
-};
-
-// Function to generate bars
-const generateBars = (
-  g: d3.Selection<SVGGElement, unknown, null, undefined>,
-  values: Array<BarChartDataType>,
-  direction: BarChartDirection,
-  barWidth: number,
-  gap: number,
+const addChartText = (
+  svg: D3SVG,
   width: number,
   height: number,
-  barHeightScale: d3.ScaleLinear<number, number>,
-  monochromeShades: string[],
-  cornerRadius: number
+  textSettings: Partial<BarChartSettingsChartTextType>
 ) => {
-  values.forEach(({ value, color, label }, index) => {
-    const position = index * (barWidth + gap);
-    const barSize = barHeightScale(value);
-
-    const barColor = monochromeShades.length
-      ? monochromeShades[monochromeShades.length - 1 - index]
-      : color;
-
-    if (direction === "vertical") {
-      // Vertical bars
-      g.append("rect")
-        .attr("x", position)
-        .attr("y", height - barSize)
-        .attr("width", barWidth)
-        .attr("height", barSize)
-        .attr("rx", cornerRadius)
-        .attr("fill", barColor);
-
-      if (label) {
-        g.append("text")
-          .attr("x", position + barWidth / 2)
-          .attr("y", height - barSize - 5)
-          .attr("text-anchor", "middle")
-          .style("fill", "#000")
-          .style("font-size", `${(12 * width) / 1000}px`)
-          .text(label);
-      }
-    } else {
-      // Horizontal bars
-      g.append("rect")
-        .attr("x", 0)
-        .attr("y", position)
-        .attr("width", barSize)
-        .attr("height", barWidth)
-        .attr("rx", cornerRadius)
-        .attr("fill", barColor);
-
-      if (label) {
-        g.append("text")
-          .attr("x", barSize + 5)
-          .attr("y", position + barWidth / 2)
-          .attr("text-anchor", "start")
-          .style("fill", "#000")
-          .style("font-size", `${(12 * width) / 1000}px`)
-          .attr("alignment-baseline", "middle")
-          .text(label);
-      }
-    }
-  });
-};
-
-export const createBarChartSvg = (
-  values: Array<BarChartDataType>,
-  config: Partial<BarChartSettingsType>
-): string => {
-  const { shape = {}, chartText = {}, monochromeColor } = config;
-
   const {
-    gap = DEFAULT_SHAPE["gap"],
-    width = DEFAULT_SHAPE["width"],
-    height = DEFAULT_SHAPE["height"],
-    barWidth = DEFAULT_SHAPE["barWidth"],
-    direction = DEFAULT_SHAPE["direction"],
-    cornerRadius = DEFAULT_SHAPE["cornerRadius"],
-  } = shape;
+    label = DEFAULT_CHART_TEXT.label,
+    color = DEFAULT_CHART_TEXT.color,
+    size = DEFAULT_CHART_TEXT.size,
+  } = textSettings;
 
-  const {
-    label = DEFAULT_CHART_TEXT["label"],
-    color = DEFAULT_CHART_TEXT["color"],
-    size = DEFAULT_CHART_TEXT["size"],
-  } = chartText;
-
-  const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
-
-  const body: d3.Selection<HTMLBodyElement, unknown, null, undefined> =
-    d3.select(dom.window.document.querySelector("body"));
-
-  // Create the SVG container and set the viewbox
-  const svg = body
-    .append<SVGSVGElement>("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("xmlns", "http://www.w3.org/2000/svg");
-
-  // Title of the chart
   svg
     .append("text")
     .attr("transform", `translate(${width / 2}, ${30})`)
@@ -155,86 +35,191 @@ export const createBarChartSvg = (
     .style("font-size", `${size}px`)
     .attr("fill", color)
     .text(label);
+};
+
+const createSvgElement = (width: number, height: number) => {
+  return body
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("xmlns", "http://www.w3.org/2000/svg");
+};
+
+const generateBarsVertical = ({
+  g,
+  values,
+  barWidth,
+  gap,
+  width,
+  height,
+  barHeightScale,
+  monochromeShades,
+  cornerRadius,
+  labelPosition,
+  labelColor,
+}: {
+  g: D3G;
+  values: Array<BarChartDataType>;
+  barWidth: number;
+  gap: number;
+  width: number;
+  height: number;
+  barHeightScale: d3.ScaleLinear<number, number>;
+  monochromeShades: string[];
+  cornerRadius: number;
+  labelPosition: BarChartLabelPosition;
+  labelColor: string;
+}) => {
+  values.forEach(({ value, color, label }, index) => {
+    const position = index * (barWidth + gap);
+    const barSize = barHeightScale(value);
+    const barColor = monochromeShades.length
+      ? monochromeShades[monochromeShades.length - 1 - index]
+      : color;
+
+    g.append("rect")
+      .attr("x", position)
+      .attr("y", height - barSize)
+      .attr("width", barWidth)
+      .attr("height", barSize)
+      .attr("rx", cornerRadius)
+      .attr("fill", barColor);
+
+    if (label) {
+      g.append("text")
+        .attr("x", position + barWidth / 2)
+        .attr("y", height - barSize - 5)
+        .attr("text-anchor", "middle")
+        .style("fill", "#000")
+        .style("font-size", `${(12 * width) / 1000}px`)
+        .text(label);
+    }
+  });
+};
+
+const generateBarsHorizontal = ({
+  g,
+  values,
+  barWidth,
+  gap,
+  width,
+  height,
+  barHeightScale,
+  monochromeShades,
+  cornerRadius,
+  labelPosition,
+  labelColor,
+}: {
+  g: D3G;
+  values: Array<BarChartDataType>;
+  barWidth: number;
+  gap: number;
+  width: number;
+  height: number;
+  barHeightScale: d3.ScaleLinear<number, number>;
+  monochromeShades: string[];
+  cornerRadius: number;
+  labelPosition: BarChartLabelPosition;
+  labelColor: string;
+}) => {
+  values.forEach(({ value, color, label }, index) => {
+    const position = index * (barWidth + gap);
+    const barSize = barHeightScale(value);
+    const barColor = monochromeShades.length
+      ? monochromeShades[monochromeShades.length - 1 - index]
+      : color;
+
+    g.append("rect")
+      .attr("x", 0)
+      .attr("y", position)
+      .attr("width", barSize)
+      .attr("height", barWidth)
+      .attr("rx", cornerRadius)
+      .attr("fill", barColor);
+
+    if (label) {
+      const xLabelPositionMap = {
+        start: 5, // just a small offset
+        center: barSize / 2,
+        end: barSize,
+      };
+      g.append("text")
+        .attr("x", xLabelPositionMap[labelPosition])
+        .attr("y", position + barWidth / 2)
+        .attr("text-anchor", "start")
+        .style("fill", labelColor)
+        .style("font-size", `${(12 * width) / 1000}px`)
+        .attr("alignment-baseline", "middle")
+        .text(label);
+    }
+  });
+};
+
+export const createBarChartSvg = (
+  values: Array<BarChartDataType>,
+  config: Partial<BarChartSettingsType>
+): string => {
+  const { shape = {}, chartText = {}, legend = {}, monochromeColor } = config;
+
+  const {
+    gap = DEFAULT_SETTINGS_BAR_CHART.gap,
+    width = DEFAULT_SETTINGS_BAR_CHART.width,
+    height = DEFAULT_SETTINGS_BAR_CHART.height,
+    barWidth = DEFAULT_SETTINGS_BAR_CHART.barWidth,
+    direction = DEFAULT_SETTINGS_BAR_CHART.direction,
+    cornerRadius = DEFAULT_SETTINGS_BAR_CHART.cornerRadius,
+    labelPosition = DEFAULT_SETTINGS_BAR_CHART.labelPosition,
+    labelColor = DEFAULT_SETTINGS_BAR_CHART.labelColor,
+  } = shape;
+
+  const {
+    label = DEFAULT_CHART_TEXT.label,
+    color = DEFAULT_CHART_TEXT.color,
+    size = DEFAULT_CHART_TEXT.size,
+  } = chartText;
+
+  const svg = createSvgElement(width, height);
+  addChartText(svg, width, height, { label, color, size });
 
   const g = svg.append("g").attr("transform", `translate(0, 50)`);
 
-  // Create scale based on direction
   const barSizeScale = d3
     .scaleLinear()
     .domain([0, d3.max(values, (d) => d.value) || 1])
     .range(direction === "vertical" ? [0, height - 50] : [0, width - 100]);
 
-  // Generate monochromeColor shades if needed
   const monochromeShades = monochromeColor
     ? generateShades(monochromeColor, values.length)
     : [];
 
-  // Call the function to generate bars
-  generateBars(
-    g,
-    values,
-    direction,
-    barWidth,
-    gap,
-    width,
-    height,
-    barSizeScale,
-    monochromeShades,
-    cornerRadius
-  );
+  if (direction === "vertical") {
+    generateBarsVertical({
+      g,
+      values,
+      barWidth,
+      gap,
+      width,
+      height,
+      barHeightScale: barSizeScale,
+      monochromeShades,
+      cornerRadius,
+      labelPosition,
+      labelColor,
+    });
+  } else {
+    generateBarsHorizontal({
+      g,
+      values,
+      barWidth,
+      gap,
+      width,
+      height,
+      barHeightScale: barSizeScale,
+      monochromeShades,
+      cornerRadius,
+      labelPosition,
+      labelColor,
+    });
+  }
 
-  return body.html();
-};
-
-// Example usage:
-
-const barChartData = [
-  { value: 80, color: "orange", label: "C#" },
-  { value: 120, color: "red", label: "Javascript" },
-  { value: 60, color: "blue", label: "CSS" },
-  { value: 150, color: "green", label: "Python" },
-  { value: 90, color: "purple", label: "Java" },
-];
-
-// Configuration for the vertical bar chart
-const configVertical = {
-  shape: {
-    direction: "vertical" as BarChartDirection,
-    barWidth: 50,
-    gap: 10,
-    width: 1000,
-    height: 500,
-  },
-  monochromeColor: "#3498db",
-  chartText: {
-    label: "Programming Languages - Vertical",
-    color: "black",
-    size: 24,
-  },
-};
-
-// Configuration for the horizontal bar chart
-const configHorizontal = {
-  shape: {
-    direction: "horizontal" as BarChartDirection,
-    barWidth: 30,
-    gap: 15,
-    width: 1000,
-    height: 400,
-  },
-  monochromeColor: "#e74c3c",
-  chartText: {
-    label: "Programming Languages - Horizontal",
-    color: "black",
-    size: 24,
-  },
-};
-
-// Generate SVG for vertical chart
-export const barChartDemoVertical = (): string => {
-  return createBarChartSvg(barChartData, configVertical);
-};
-
-export const barChartDemoHorizontal = (): string => {
-  return createBarChartSvg(barChartData, configHorizontal);
+  return getHtml();
 };
